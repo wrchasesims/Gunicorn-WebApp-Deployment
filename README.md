@@ -1,4 +1,4 @@
-# Deploy Apps With Gunicorn, Nginx & Infrastructure as Code 
+# Deploying WebApps With Gunicorn, Nginx & Infrastructure as Code 
 
 This one goes out to all of those who would rather do things manually from the AWS console, because it's *"just quicker and easier"*. Nonsense, I say!!! 
 
