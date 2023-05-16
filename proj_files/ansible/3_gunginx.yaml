@@ -1,0 +1,63 @@
+---
+- hosts: webservers
+  become: true
+  become_user: root
+  gather_facts: yes
+  tasks:
+    - name: Copy Gunicorn systemd service file
+      template:
+        src: /home/cs/gh/assessments/assessment2/proj_files/configs/gunicorn.service
+        dest: /etc/systemd/system/gunicorn.service
+      register: gunicorn
+
+    - name: Enable and start Gunicorn service
+      systemd:
+        name: gunicorn
+        state: started
+        enabled: yes
+      when: gunicorn.changed
+      notify:
+        - Restart Gunicorn
+
+    - name: Restart Gunicorn
+      systemd:
+        name: gunicorn
+        state: restarted
+      when: gunicorn.changed
+
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: present
+
+    - name: Configure Nginx
+      template:
+        src: /home/cs/gh/assessments/assessment2/proj_files/configs/proxy.conf
+        dest: /etc/nginx/sites-available/proxy.conf
+        owner: root
+        group: root
+        mode: 0644
+      notify: Restart Nginx
+
+    - name: Change public_ip in Nginx configuration
+      replace:
+        path: /etc/nginx/sites-available/proxy.conf
+        regexp: "server_name PUBLIC_IP;"
+        replace: "server_name {{ ansible_host }};"
+
+    - name: Enable Nginx site
+      file:
+        src: /etc/nginx/sites-available/proxy.conf
+        dest: /etc/nginx/sites-enabled/proxy.conf
+        state: link
+      notify: Restart Nginx
+
+  handlers:
+    - name: Restart Nginx
+      service:
+        name: nginx
+        state: restarted
+    - name: Restart Gunicorn
+      service:
+        name: gunicorn.service
+        state: restarted

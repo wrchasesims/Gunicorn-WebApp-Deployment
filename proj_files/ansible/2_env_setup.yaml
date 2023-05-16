@@ -1,0 +1,29 @@
+# Copy repo, setup venvs, download py requirements & set env vars
+- hosts: webservers
+  become: true
+  become_user: ubuntu
+  gather_facts: no
+
+  tasks:
+    - name: Pulling todo repo to webservers
+      git:
+        repo: "{{ repo_url }}/{{ repo }}.git"
+        dest: "{{ repo_dir }}"
+        accept_hostkey: yes
+
+    - name: Creating virtual environment
+      command: python3 -m venv venv
+      args:
+        chdir: "{{ repo_dir }}"
+
+    - name: Installing requirements with pip
+      pip:
+        requirements: "{{ repo_dir }}/requirements.txt"
+        state: present
+        executable: "{{ repo_dir }}/venv/bin/pip"
+
+    - name: Copy env file to hosts
+      copy:
+        src: /home/cs/gh/assessments/assessment2/proj_files/configs/env
+        dest: /home/ubuntu/todo-list/.env
+        mode: 0644

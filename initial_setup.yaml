@@ -1,0 +1,76 @@
+# All files were prepared ahead of time. Copy project files from local machine over to the master node.
+---
+- name: Let the copying begin!
+- hosts: all
+  tasks:
+    - name: Copying custom .bashrc.
+      copy:
+        src: proj_files/configs/.bashrc
+        dest: /home/ubuntu/
+        owner: ubuntu
+        group: ubuntu
+        mode: "0644"
+    - name: Copying secret-squirrel files. Shhhh...
+      copy:
+        src: /home/cs/.ssh/NewPair.pem
+        dest: /home/ubuntu/.ssh
+        owner: ubuntu
+        group: ubuntu
+        mode: "0400"
+    # Using synchronize module to copy entire directories at a time.
+    - name: Synching contents of project folder across hosts.
+      synchronize:
+        src: proj_files/
+        dest: /home/ubuntu/proj_files/
+        mode: "push"
+
+- name: Upgrade your PipBoys. And, how!?
+- hosts: all
+  become: true
+  become_user: root
+  gather_facts: no
+  tasks:
+    - name: Apt update all nodes.
+      apt: update_cache=yes
+    - name: installing pip and venv.
+      apt: name={{item}} state=present
+      with_items:
+        - python3.10-venv
+        - python-pip
+
+- name: Putting Ansible on master.
+- hosts: master
+  become: true
+  become_user: root
+  gather_facts: no
+  tasks:
+    - name: Installing Ansible on master node.
+      apt: name={{item}} state=present
+      with_items:
+        - ansible
+
+- name: Putting nginex on webservers
+- hosts: webservers
+  become: true
+  become_user: root
+  gather_facts: no
+  tasks:
+    - name: Installing Nginx on webservers.
+      apt: name={{item}} state=present
+      with_items:
+        - nginx
+
+- name: Global reboot
+- hosts: all
+  gather_facts: yes
+  remote_user: root
+  become: true
+  tasks:
+    - name: REE-booting hosts (just in case there was a kernel upgrade...)
+      reboot:
+      async: 1
+      poll: 0
+    - name: Checkng the uptime of the servers.
+      shell: "uptime"
+      register: Uptime
+    - debug: var=Uptime
