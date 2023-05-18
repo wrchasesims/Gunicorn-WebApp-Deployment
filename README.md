@@ -2,7 +2,7 @@
 
 This one goes out to all of those who would rather do things manually from the AWS console, because it's *"just quicker and easier"*. Nonsense, I say!!! 
 
-While an **Infrastructure as Code (IaC)** approach does have require more planning and time upfront, once you write a few templates, every single deployment from that point forward can be done ***BLAZINGLY FAST*** (Rust did not sponser this project).
+While an **Infrastructure as Code (IaC)** approach does require more planning and time upfront, once you write a few templates, every single deployment from that point forward can be done ***BLAZINGLY FAST*** (Rust did not sponser this project).
 
 For the sake of brevity, I'll only touch on the keypoints. Please feel free to go into the project files at any time if you need more context. Also feel free to make suggestions on how this walkthrough could be made better!
 
